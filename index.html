@@ -6,15 +6,20 @@
 <title>CrediEfectivo - Solicitud de Crédito</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="container">
   <div class="header">
     <div class="brand">
       <i class="fas fa-hand-holding-usd"></i>
-      <h1>CREDIEFECTIVO<small>CASH LOAN FINANCIAL</small></h1>
+      <div>
+        <h1>CREDIEFECTIVO</h1>
+        <small>CASH LOAN FINANCIAL</small>
+      </div>
     </div>
     <div class="title">SOLICITUD DE CRÉDITO</div>
   </div>
@@ -218,7 +223,7 @@
         </div>
       </div>
       <div class="calc-line total"><span>Total de ingresos (aval)</span><span id="a_total_ing_disp">$0</span></div>
-      <div class="note"><i class="fas fa-circle-info"></i> Sección adicional recomendada (no incluida en la plantilla original) para evaluar también la capacidad de pago del aval:</div>
+      <div class="note"><i class="fas fa-circle-info"></i> Sección adicional recomendada para evaluar también la capacidad de pago del aval:</div>
 
       <!-- ============ GASTOS Y CAPACIDAD AVAL (extra) ============ -->
       <div class="two-col">
@@ -249,8 +254,9 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" id="preview-btn" class="btn btn-primary"><i class="fas fa-eye"></i> Vista previa</button>
-        <button type="submit" id="submit-btn" class="btn btn-success"><i class="fas fa-file-pdf"></i> Generar PDF y enviar</button>
+        <button type="button" id="preview-btn" class="btn btn-primary"><i class="fas fa-eye"></i> Vista previa PDF</button>
+        <button type="submit" id="submit-btn" class="btn btn-success"><i class="fas fa-file-pdf"></i> Generar PDF + WhatsApp</button>
+        <button type="button" id="excel-btn" class="btn btn-accent"><i class="fas fa-file-excel"></i> Descargar Excel</button>
         <a href="https://wa.me/522207863287?text=Hola%2C%20me%20interesa%20solicitar%20un%20cr%C3%A9dito%20con%20CrediEfectivo" class="btn btn-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> Contactar por WhatsApp</a>
       </div>
     </form>
@@ -259,6 +265,9 @@
 
 <a href="https://wa.me/522207863287?text=Hola%2C%20me%20interesa%20solicitar%20un%20cr%C3%A9dito%20con%20CrediEfectivo" class="whatsapp-float" target="_blank" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></a>
 
-<script src="script.js"></script>
+<!-- Contenedor oculto para el PDF (formato LETTER 816px) -->
+<div id="pdf-container" style="position:fixed; left:-10000px; top:0; width:816px; background:#fff;"></div>
+
+<script src="app.js"></script>
 </body>
-</html>
+                                                                                         </html>
