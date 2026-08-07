@@ -86,29 +86,29 @@ function validateForm(){
   return !hasError;
 }
 
-function generatePDFHTML(d){
+const PDF_CSS = `
+    .pdf-doc{font-family:'Segoe UI',Arial,sans-serif;padding:36px;color:#141414;font-size:13px;background:#fff;}
+    .pdf-doc .top{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #111;padding-bottom:14px;margin-bottom:18px;}
+    .pdf-doc .top h1{font-size:22px;letter-spacing:.03em;} .pdf-doc .top h1 small{display:block;font-size:9px;letter-spacing:.2em;color:#888;}
+    .pdf-doc .top .t2{font-size:17px;font-weight:800;letter-spacing:.05em;}
+    .pdf-doc .meta{display:flex;gap:16px;font-size:11px;color:#555;margin-bottom:18px;flex-wrap:wrap;}
+    .pdf-doc .meta span b{color:#111;}
+    .pdf-doc .bar{background:#111;color:#fff;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:16px;}
+    .pdf-doc .bar.gold{background:#c8a13a;color:#1c1c1c;}
+    .pdf-doc .grid2{display:grid;grid-template-columns:1fr 1fr;}
+    .pdf-doc .row{display:flex;padding:5px 12px;border-bottom:1px solid #eee;font-size:12px;}
+    .pdf-doc .label{width:180px;font-weight:600;color:#555;flex-shrink:0;} .pdf-doc .value{flex:1;}
+    .pdf-doc .calc{display:flex;justify-content:space-between;background:#f6f4ee;padding:8px 12px;font-weight:700;font-size:12.5px;border-top:1px dashed #ccc;}
+    .pdf-doc .calc.total{background:#eaf5ee;color:#1f8a5f;}
+    .pdf-doc .footer{text-align:center;margin-top:30px;padding-top:14px;border-top:1px solid #ddd;font-size:10.5px;color:#999;}
+`;
+
+function generatePDFBody(d){
   const c = totals(d,'c'); const a = totals(d,'a');
   const N = x => parseFloat(x||0).toLocaleString();
   const productInfo = products[d.producto] || {name:'No seleccionado', interestFactor:0, term:0, termType:''};
   const row = (label,value)=>`<div class="row"><span class="label">${label}</span><span class="value">${value||'—'}</span></div>`;
   return `
-  <html><head><meta charset="UTF-8"><title>Solicitud de Crédito - CrediEfectivo</title>
-  <style>
-    body{font-family:'Segoe UI',Arial,sans-serif;padding:36px;color:#141414;font-size:13px;}
-    .top{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #111;padding-bottom:14px;margin-bottom:18px;}
-    .top h1{font-size:22px;letter-spacing:.03em;} .top h1 small{display:block;font-size:9px;letter-spacing:.2em;color:#888;}
-    .top .t2{font-size:17px;font-weight:800;letter-spacing:.05em;}
-    .meta{display:flex;gap:16px;font-size:11px;color:#555;margin-bottom:18px;flex-wrap:wrap;}
-    .meta span b{color:#111;}
-    .bar{background:#111;color:#fff;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:16px;}
-    .bar.gold{background:#c8a13a;color:#1c1c1c;}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;}
-    .row{display:flex;padding:5px 12px;border-bottom:1px solid #eee;font-size:12px;}
-    .label{width:180px;font-weight:600;color:#555;flex-shrink:0;} .value{flex:1;}
-    .calc{display:flex;justify-content:space-between;background:#f6f4ee;padding:8px 12px;font-weight:700;font-size:12.5px;border-top:1px dashed #ccc;}
-    .calc.total{background:#eaf5ee;color:#1f8a5f;}
-    .footer{text-align:center;margin-top:30px;padding-top:14px;border-top:1px solid #ddd;font-size:10.5px;color:#999;}
-  </style></head><body>
     <div class="top">
       <h1>CREDIEFECTIVO<small>CASH LOAN FINANCIAL</small></h1>
       <div class="t2">SOLICITUD DE CRÉDITO</div>
@@ -214,8 +214,14 @@ function generatePDFHTML(d){
       <p>Documento generado automáticamente desde la plataforma CrediEfectivo</p>
       <p>Este documento es una solicitud de crédito y no constituye una aprobación</p>
       <p>© ${new Date().getFullYear()} CrediEfectivo - Todos los derechos reservados</p>
-    </div>
-  </body></html>`;
+    </div>`;
+}
+
+// Documento completo (solo para la ventana de vista previa, vía document.write)
+function generatePDFHTML(d){
+  return `<html><head><meta charset="UTF-8"><title>Solicitud de Crédito - CrediEfectivo</title>
+  <style>${PDF_CSS}</style></head>
+  <body class="pdf-doc">${generatePDFBody(d)}</body></html>`;
 }
 
 async function generateAndSendPDF(){
@@ -225,21 +231,38 @@ async function generateAndSendPDF(){
   }
   const d = getFormData();
   Swal.fire({title:'Generando PDF...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
+
+  // Estilo temporal en el <head> del documento (un div no puede contener <style> de forma confiable
+  // cuando se le asigna un documento HTML completo vía innerHTML; por eso se inyecta aparte)
+  const styleEl = document.createElement('style');
+  styleEl.id = 'pdf-temp-style';
+  styleEl.textContent = PDF_CSS;
+  document.head.appendChild(styleEl);
+
+  // Contenedor temporal: fijo en la esquina superior, detrás de todo (z-index negativo)
+  // y con ancho explícito. Posicionarlo muy lejos con "left:-9999px" es lo que causaba
+  // que html2canvas capturara un lienzo vacío.
+  const tempDiv = document.createElement('div');
+  tempDiv.className = 'pdf-doc';
+  tempDiv.innerHTML = generatePDFBody(d);
+  tempDiv.style.position = 'fixed';
+  tempDiv.style.top = '0';
+  tempDiv.style.left = '0';
+  tempDiv.style.zIndex = '-9999';
+  tempDiv.style.width = '794px'; // ancho aproximado de A4 a 96dpi
+  document.body.appendChild(tempDiv);
+
   try{
-    const htmlContent = generatePDFHTML(d);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    tempDiv.style.position='absolute'; tempDiv.style.left='-9999px';
-    document.body.appendChild(tempDiv);
     const opt = {
       margin:[10,10,10,10],
       filename:`Solicitud_Credito_${(d.c_nombre+'_'+d.c_ap_paterno).replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`,
       image:{type:'jpeg', quality:0.98},
-      html2canvas:{scale:2, useCORS:true},
+      html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff', windowWidth:794},
       jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}
     };
     await html2pdf().set(opt).from(tempDiv).save();
     document.body.removeChild(tempDiv);
+    styleEl.remove();
     Swal.close();
 
     const c = totals(d,'c');
@@ -268,6 +291,8 @@ async function generateAndSendPDF(){
     updateCalc();
   }catch(err){
     console.error(err);
+    if(tempDiv.parentNode) document.body.removeChild(tempDiv);
+    if(styleEl.parentNode) styleEl.remove();
     Swal.fire({icon:'error', title:'Error al generar el PDF', confirmButtonColor:'#e74c3c'});
   }
 }
