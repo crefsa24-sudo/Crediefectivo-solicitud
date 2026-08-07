@@ -232,27 +232,35 @@ async function generateAndSendPDF(){
   const d = getFormData();
   Swal.fire({title:'Generando PDF...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
 
-  // Estilo temporal en el <head> del documento (un div no puede contener <style> de forma confiable
-  // cuando se le asigna un documento HTML completo vía innerHTML; por eso se inyecta aparte)
-  const styleEl = document.createElement('style');
-  styleEl.id = 'pdf-temp-style';
-  styleEl.textContent = PDF_CSS;
-  document.head.appendChild(styleEl);
-
-  // Contenedor temporal: fijo en la esquina superior, detrás de todo (z-index negativo)
-  // y con ancho explícito. Posicionarlo muy lejos con "left:-9999px" es lo que causaba
-  // que html2canvas capturara un lienzo vacío.
-  const tempDiv = document.createElement('div');
-  tempDiv.className = 'pdf-doc';
-  tempDiv.innerHTML = generatePDFBody(d);
-  tempDiv.style.position = 'fixed';
-  tempDiv.style.top = '0';
-  tempDiv.style.left = '0';
-  tempDiv.style.zIndex = '-9999';
-  tempDiv.style.width = '794px'; // ancho aproximado de A4 a 96dpi
-  document.body.appendChild(tempDiv);
+  // Se renderiza el PDF dentro de un <iframe> con su propio documento (srcdoc), en vez de
+  // clonar el HTML dentro de un <div> de la página. Un iframe garantiza que el <style> y el
+  // <body> se interpreten como un documento real y completo, que es lo que necesita
+  // html2canvas para capturar el contenido correctamente; un <div> normal no lo garantiza
+  // y era la causa del PDF en blanco.
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.top = '0';
+  iframe.style.left = '-99999px';
+  iframe.style.width = '794px';   // ancho aproximado de A4 a 96dpi
+  iframe.style.height = '1200px';
+  iframe.style.border = 'none';
+  document.body.appendChild(iframe);
 
   try{
+    if(typeof html2pdf === 'undefined'){
+      throw new Error('La librería html2pdf no se cargó. Revisa tu conexión a internet o desactiva bloqueadores de anuncios/scripts en esta página.');
+    }
+
+    const fullHtml = generatePDFHTML(d);
+    await new Promise((resolve, reject)=>{
+      iframe.onload = resolve;
+      iframe.onerror = () => reject(new Error('No se pudo cargar el contenido del PDF.'));
+      iframe.srcdoc = fullHtml;
+    });
+    // Un frame extra para asegurar que el layout terminó de calcularse antes de capturar
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const targetEl = iframe.contentDocument.body;
     const opt = {
       margin:[10,10,10,10],
       filename:`Solicitud_Credito_${(d.c_nombre+'_'+d.c_ap_paterno).replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`,
@@ -260,9 +268,8 @@ async function generateAndSendPDF(){
       html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff', windowWidth:794},
       jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}
     };
-    await html2pdf().set(opt).from(tempDiv).save();
-    document.body.removeChild(tempDiv);
-    styleEl.remove();
+    await html2pdf().set(opt).from(targetEl).save();
+    document.body.removeChild(iframe);
     Swal.close();
 
     const c = totals(d,'c');
@@ -291,9 +298,8 @@ async function generateAndSendPDF(){
     updateCalc();
   }catch(err){
     console.error(err);
-    if(tempDiv.parentNode) document.body.removeChild(tempDiv);
-    if(styleEl.parentNode) styleEl.remove();
-    Swal.fire({icon:'error', title:'Error al generar el PDF', confirmButtonColor:'#e74c3c'});
+    if(iframe.parentNode) document.body.removeChild(iframe);
+    Swal.fire({icon:'error', title:'Error al generar el PDF', text: err.message || 'Por favor intenta de nuevo.', confirmButtonColor:'#e74c3c'});
   }
 }
 
