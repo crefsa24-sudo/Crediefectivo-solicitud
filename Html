@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrediEfectivo - Solicitud de Crédito</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">
+      <i class="fas fa-hand-holding-usd"></i>
+      <h1>CREDIEFECTIVO<small>CASH LOAN FINANCIAL</small></h1>
+    </div>
+    <div class="title">SOLICITUD DE CRÉDITO</div>
+  </div>
+
+  <div class="meta-bar">
+    <div class="m"><label>Fecha</label><input type="date" id="fecha" class="form-control"></div>
+    <div class="m"><label>Ejecutivo</label><input type="text" id="ejecutivo" class="form-control" placeholder="Nombre del ejecutivo"></div>
+    <div class="m"><label>Zona</label><input type="text" id="zona" class="form-control" placeholder="Zona"></div>
+    <div class="m"><label>Producto</label>
+      <select id="producto" class="form-control" required>
+        <option value="">Selecciona...</option>
+        <option value="semanal-15">Semanal 15 semanas (42.5%)</option>
+        <option value="semanal-31">Semanal 31 semanas (55%)</option>
+        <option value="diario-21">Diario 21 días (55.4%)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-wrapper">
+    <form id="credit-form">
+
+      <!-- ============ DATOS DEL CLIENTE ============ -->
+      <div class="bar">Datos del cliente</div>
+      <div class="section-pad">
+        <div class="form-row">
+          <div class="form-group"><label>Nombre <span class="required">*</span></label><input type="text" id="c_nombre" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Apellido paterno <span class="required">*</span></label><input type="text" id="c_ap_paterno" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Apellido materno</label><input type="text" id="c_ap_materno" class="form-control"></div>
+        </div>
+        <div class="form-row six">
+          <div class="form-group"><label>Día</label><input type="number" id="c_dia" class="form-control" min="1" max="31"></div>
+          <div class="form-group"><label>Mes</label><input type="number" id="c_mes" class="form-control" min="1" max="12"></div>
+          <div class="form-group"><label>Año</label><input type="number" id="c_anio" class="form-control" min="1930" max="2010"></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="c_sexo" class="form-control"><option value="">--</option><option>Masculino</option><option>Femenino</option></select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;"><label>Estado civil</label>
+            <select id="c_estado_civil" class="form-control">
+              <option value="">Selecciona...</option>
+              <option>Soltero/a</option><option>Casado/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Unión libre</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Celular personal <span class="required">*</span></label><input type="tel" id="c_cel_personal" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Celular referencia</label><input type="tel" id="c_cel_ref" class="form-control"></div>
+          <div class="form-group"><label>CURP</label><input type="text" id="c_curp" class="form-control" maxlength="18" style="text-transform:uppercase;"></div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group"><label>Domicilio (calle y número) <span class="required">*</span></label><input type="text" id="c_domicilio" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Colonia</label><input type="text" id="c_colonia" class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Municipio</label><input type="text" id="c_municipio" class="form-control"></div>
+          <div class="form-group"><label>Estado</label><input type="text" id="c_estado" class="form-control"></div>
+          <div class="form-group"><label>Código postal</label><input type="text" id="c_cp" class="form-control" maxlength="5"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Vivienda</label>
+            <div class="radio-row">
+              <label><input type="radio" name="c_vivienda" value="Propia"> Propia</label>
+              <label><input type="radio" name="c_vivienda" value="Rentada"> Rentada</label>
+              <label><input type="radio" name="c_vivienda" value="Familiares"> Familiares</label>
+            </div>
+          </div>
+          <div class="form-group"><label>Tiempo de residencia (años)</label><input type="number" id="c_residencia" class="form-control" min="0"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="c_email" class="form-control"></div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group"><label>Nombre de cónyuge</label><input type="text" id="c_conyuge" class="form-control"></div>
+          <div class="form-group"><label>Celular personal (cónyuge)</label><input type="tel" id="c_conyuge_cel" class="form-control"></div>
+        </div>
+      </div>
+
+      <!-- ============ ACTIVIDAD ECONOMICA CLIENTE ============ -->
+      <div class="bar">Actividad económica (ingresos) — Cliente</div>
+      <div class="section-pad">
+        <div class="form-row">
+          <div class="form-group"><label>Ocupación</label><input type="text" id="c_ocupacion" class="form-control"></div>
+          <div class="form-group"><label>Empresa</label><input type="text" id="c_empresa" class="form-control"></div>
+          <div class="form-group"><label>Dirección (empresa)</label><input type="text" id="c_empresa_dir" class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Sueldo mensual <span class="required">*</span></label><input type="number" id="c_sueldo" class="form-control ing-calc" data-t="c" min="0" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group">
+            <label>¿Comprueba ingresos?</label>
+            <div class="radio-row"><label><input type="radio" name="c_comprueba" value="Sí"> Sí</label><label><input type="radio" name="c_comprueba" value="No"> No</label></div>
+          </div>
+          <div class="form-group"><label>Otros ingresos</label><input type="number" id="c_otros_ing" class="form-control ing-calc" data-t="c" min="0"></div>
+        </div>
+      </div>
+      <div class="calc-line total"><span>Total de ingresos (cliente)</span><span id="c_total_ing_disp">$0</span></div>
+
+      <!-- ============ GASTOS Y CAPACIDAD CLIENTE ============ -->
+      <div class="two-col">
+        <div>
+          <div class="bar">Estudio de gastos básicos (egresos)</div>
+          <div class="section-pad">
+            <div class="form-group"><label>Pago mensual de renta o hipoteca</label><input type="number" id="c_g_renta" class="form-control gasto-calc" data-t="c" min="0"></div>
+            <div class="form-group"><label>Gasto mensual de alimentos</label><input type="number" id="c_g_alimentos" class="form-control gasto-calc" data-t="c" min="0"></div>
+            <div class="form-group"><label>Servicios (luz, agua, cable y tel.)</label><input type="number" id="c_g_servicios" class="form-control gasto-calc" data-t="c" min="0"></div>
+            <div class="form-group"><label>Transporte (pasaje, gasolina)</label><input type="number" id="c_g_transporte" class="form-control gasto-calc" data-t="c" min="0"></div>
+            <div class="form-group"><label>Estudios mensuales (personal, hijos)</label><input type="number" id="c_g_estudios" class="form-control gasto-calc" data-t="c" min="0"></div>
+            <div class="form-group"><label>Otros gastos (vestido, calzado, medicina, deudas)</label><input type="number" id="c_g_otros" class="form-control gasto-calc" data-t="c" min="0"></div>
+          </div>
+          <div class="calc-line"><span>Total de gastos</span><span id="c_total_gastos_disp">$0</span></div>
+        </div>
+        <div>
+          <div class="bar gold">Capacidad de gastos</div>
+          <div class="section-pad">
+            <div class="form-row">
+              <div class="form-group"><label>Ingresos mes 1</label><input type="number" id="c_ing_m1" class="form-control ing-mes" data-t="c" min="0"></div>
+              <div class="form-group"><label>Ingresos mes 2</label><input type="number" id="c_ing_m2" class="form-control ing-mes" data-t="c" min="0"></div>
+              <div class="form-group"><label>Ingresos mes 3</label><input type="number" id="c_ing_m3" class="form-control ing-mes" data-t="c" min="0"></div>
+            </div>
+          </div>
+          <div class="calc-line"><span>Diferencia (promedio ingresos − gastos)</span><span id="c_diferencia_disp">$0</span></div>
+          <div class="calc-line total"><span>Capacidad de pago semanal (÷4)</span><span id="c_capacidad_disp">$0</span></div>
+        </div>
+      </div>
+
+      <!-- ============ MONTO / PLAZO ============ -->
+      <div class="bar">Monto y plazo</div>
+      <div class="section-pad">
+        <div class="form-row">
+          <div class="form-group"><label>Monto solicitado <span class="required">*</span></label><input type="number" id="monto" class="form-control" min="1000" max="15000" required><div class="error-message">Monto entre $1,000 y $15,000</div></div>
+          <div class="form-group"><label>Plazo acordado (semanas)</label><input type="number" id="plazo" class="form-control" min="1" placeholder="15"></div>
+          <div class="form-group">
+            <label>Tipo de cliente</label>
+            <div class="radio-row"><label><input type="radio" name="tipo_cliente" value="Cliente nuevo" checked> Cliente nuevo</label><label><input type="radio" name="tipo_cliente" value="Renovación"> Renovación</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ DATOS DEL AVAL ============ -->
+      <div class="bar">Datos del aval</div>
+      <div class="section-pad">
+        <div class="form-row">
+          <div class="form-group"><label>Nombre(s) <span class="required">*</span></label><input type="text" id="a_nombre" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Apellido paterno <span class="required">*</span></label><input type="text" id="a_ap_paterno" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Apellido materno</label><input type="text" id="a_ap_materno" class="form-control"></div>
+        </div>
+        <div class="form-row six">
+          <div class="form-group"><label>Día</label><input type="number" id="a_dia" class="form-control" min="1" max="31"></div>
+          <div class="form-group"><label>Mes</label><input type="number" id="a_mes" class="form-control" min="1" max="12"></div>
+          <div class="form-group"><label>Año</label><input type="number" id="a_anio" class="form-control" min="1930" max="2010"></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="a_sexo" class="form-control"><option value="">--</option><option>Masculino</option><option>Femenino</option></select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;"><label>Estado civil</label>
+            <select id="a_estado_civil" class="form-control">
+              <option value="">Selecciona...</option>
+              <option>Soltero/a</option><option>Casado/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Unión libre</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Celular personal <span class="required">*</span></label><input type="tel" id="a_cel_personal" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Celular referencia</label><input type="tel" id="a_cel_ref" class="form-control"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="a_email" class="form-control"></div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group"><label>Domicilio (calle y número) <span class="required">*</span></label><input type="text" id="a_domicilio" class="form-control" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group"><label>Colonia</label><input type="text" id="a_colonia" class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Municipio</label><input type="text" id="a_municipio" class="form-control"></div>
+          <div class="form-group"><label>Estado</label><input type="text" id="a_estado" class="form-control"></div>
+          <div class="form-group"><label>Código postal</label><input type="text" id="a_cp" class="form-control" maxlength="5"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Vivienda</label>
+            <div class="radio-row">
+              <label><input type="radio" name="a_vivienda" value="Propia"> Propia</label>
+              <label><input type="radio" name="a_vivienda" value="Rentada"> Rentada</label>
+              <label><input type="radio" name="a_vivienda" value="Familiares"> Familiares</label>
+            </div>
+          </div>
+          <div class="form-group"><label>Tiempo de residencia (años)</label><input type="number" id="a_residencia" class="form-control" min="0"></div>
+          <div class="form-group"><label>Nombre de cónyuge</label><input type="text" id="a_conyuge" class="form-control"></div>
+        </div>
+      </div>
+
+      <!-- ============ ACTIVIDAD ECONOMICA AVAL ============ -->
+      <div class="bar">Actividad económica (ingresos) — Aval</div>
+      <div class="section-pad">
+        <div class="form-row">
+          <div class="form-group"><label>Ocupación</label><input type="text" id="a_ocupacion" class="form-control"></div>
+          <div class="form-group"><label>Empresa</label><input type="text" id="a_empresa" class="form-control"></div>
+          <div class="form-group"><label>Dirección (empresa)</label><input type="text" id="a_empresa_dir" class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Sueldo mensual <span class="required">*</span></label><input type="number" id="a_sueldo" class="form-control ing-calc" data-t="a" min="0" required><div class="error-message">Obligatorio</div></div>
+          <div class="form-group">
+            <label>¿Comprueba ingresos?</label>
+            <div class="radio-row"><label><input type="radio" name="a_comprueba" value="Sí"> Sí</label><label><input type="radio" name="a_comprueba" value="No"> No</label></div>
+          </div>
+          <div class="form-group"><label>Otros ingresos</label><input type="number" id="a_otros_ing" class="form-control ing-calc" data-t="a" min="0"></div>
+        </div>
+      </div>
+      <div class="calc-line total"><span>Total de ingresos (aval)</span><span id="a_total_ing_disp">$0</span></div>
+      <div class="note"><i class="fas fa-circle-info"></i> Sección adicional recomendada (no incluida en la plantilla original) para evaluar también la capacidad de pago del aval:</div>
+
+      <!-- ============ GASTOS Y CAPACIDAD AVAL (extra) ============ -->
+      <div class="two-col">
+        <div>
+          <div class="bar">Estudio de gastos básicos (egresos) — Aval</div>
+          <div class="section-pad">
+            <div class="form-group"><label>Pago mensual de renta o hipoteca</label><input type="number" id="a_g_renta" class="form-control gasto-calc" data-t="a" min="0"></div>
+            <div class="form-group"><label>Gasto mensual de alimentos</label><input type="number" id="a_g_alimentos" class="form-control gasto-calc" data-t="a" min="0"></div>
+            <div class="form-group"><label>Servicios (luz, agua, cable y tel.)</label><input type="number" id="a_g_servicios" class="form-control gasto-calc" data-t="a" min="0"></div>
+            <div class="form-group"><label>Transporte (pasaje, gasolina)</label><input type="number" id="a_g_transporte" class="form-control gasto-calc" data-t="a" min="0"></div>
+            <div class="form-group"><label>Estudios mensuales (personal, hijos)</label><input type="number" id="a_g_estudios" class="form-control gasto-calc" data-t="a" min="0"></div>
+            <div class="form-group"><label>Otros gastos (vestido, calzado, medicina, deudas)</label><input type="number" id="a_g_otros" class="form-control gasto-calc" data-t="a" min="0"></div>
+          </div>
+          <div class="calc-line"><span>Total de gastos</span><span id="a_total_gastos_disp">$0</span></div>
+        </div>
+        <div>
+          <div class="bar gold">Capacidad de gastos — Aval</div>
+          <div class="section-pad">
+            <div class="form-row">
+              <div class="form-group"><label>Ingresos mes 1</label><input type="number" id="a_ing_m1" class="form-control ing-mes" data-t="a" min="0"></div>
+              <div class="form-group"><label>Ingresos mes 2</label><input type="number" id="a_ing_m2" class="form-control ing-mes" data-t="a" min="0"></div>
+              <div class="form-group"><label>Ingresos mes 3</label><input type="number" id="a_ing_m3" class="form-control ing-mes" data-t="a" min="0"></div>
+            </div>
+          </div>
+          <div class="calc-line"><span>Diferencia (promedio ingresos − gastos)</span><span id="a_diferencia_disp">$0</span></div>
+          <div class="calc-line total"><span>Capacidad de pago semanal (÷4)</span><span id="a_capacidad_disp">$0</span></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="preview-btn" class="btn btn-primary"><i class="fas fa-eye"></i> Vista previa</button>
+        <button type="submit" id="submit-btn" class="btn btn-success"><i class="fas fa-file-pdf"></i> Generar PDF y enviar</button>
+        <a href="https://wa.me/522207863287?text=Hola%2C%20me%20interesa%20solicitar%20un%20cr%C3%A9dito%20con%20CrediEfectivo" class="btn btn-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> Contactar por WhatsApp</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<a href="https://wa.me/522207863287?text=Hola%2C%20me%20interesa%20solicitar%20un%20cr%C3%A9dito%20con%20CrediEfectivo" class="whatsapp-float" target="_blank" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></a>
+
+<script src="script.js"></script>
+</body>
+</html>
